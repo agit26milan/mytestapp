@@ -4,10 +4,15 @@ import {getSublistMenu} from '../../api';
 import {COMPANY_ID} from '../../constant';
 import Product from './Product';
 import {useNavigation} from '@react-navigation/native';
+import Search from '../../components/Search';
 
 const HomeScreen = (props: any) => {
   const {route} = props;
   const [listSubMenu, setListSubMenu] = React.useState<Home.ResponseSubMenu[]>(
+    [],
+  );
+  const [searchText, setSearchText] = React.useState<string | null>(null);
+  const [tempSearch, setTempSearch] = React.useState<Home.ResponseSubMenu[]>(
     [],
   );
   const {navigate} = useNavigation();
@@ -37,6 +42,22 @@ const HomeScreen = (props: any) => {
     navigate('ProductDetail' as never, {product});
   };
 
+  const onSearch = (text: string) => {
+    if (text.length >= 3) {
+      setSearchText(text);
+      onFilterProduct(text);
+    } else {
+      setSearchText(null);
+      setTempSearch([]);
+    }
+  };
+  const onFilterProduct = (text: string) => {
+    const filterProductt = listSubMenu.filter(data =>
+      data.name.toLowerCase().includes(text.toLowerCase()),
+    );
+    setTempSearch(filterProductt);
+  };
+
   React.useEffect(() => {
     if (route.params?.id) {
       getSubListCategory(true);
@@ -49,11 +70,15 @@ const HomeScreen = (props: any) => {
 
   return (
     <View style={styles.containerMenu}>
+      <View style={styles.searchContent}>
+        <Search onChangeText={onSearch} placeholder="Search" />
+      </View>
+
       <FlatList
         refreshControl={
           <RefreshControl refreshing={loading} onRefresh={onPullRefresh} />
         }
-        data={listSubMenu}
+        data={searchText?.length > 0 ? tempSearch : listSubMenu}
         renderItem={renderItem}
         numColumns={3}
         keyExtractor={item => item.id}
@@ -107,6 +132,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     height: 50,
     borderRadius: 25,
+  },
+  searchContent: {
+    paddingHorizontal: 10,
   },
 });
 
