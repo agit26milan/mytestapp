@@ -1,7 +1,6 @@
 import React from 'react';
 import {View, Image, Text, StyleSheet} from 'react-native';
 import {formatMoney} from '../../utils';
-import useFavorite from '../../hooks/useFavorite';
 import {useRoute} from '@react-navigation/native';
 
 const styles = StyleSheet.create({
