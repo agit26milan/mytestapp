@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import Tab from './TopTab';
-import FavoriteScreen from '../screen/Favorite';
+import ProductDetails from '../screen/ProductDetails';
 
 const Stack = createStackNavigator();
 
@@ -9,11 +9,15 @@ const RootNavigation = () => {
   return (
     <Stack.Navigator>
       <Stack.Screen
-        options={{headerShown: false}}
+        options={{headerShown: false, title: 'Home'}}
         name="BottomTab"
         component={Tab}
       />
-      <Stack.Screen name="Favorite" component={FavoriteScreen} />
+      <Stack.Screen
+        options={{title: 'Product Detail'}}
+        name="ProductDetail"
+        component={ProductDetails}
+      />
     </Stack.Navigator>
   );
 };

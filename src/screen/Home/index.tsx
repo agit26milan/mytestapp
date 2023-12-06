@@ -1,19 +1,9 @@
 import React from 'react';
-import {
-  View,
-  StyleSheet,
-  FlatList,
-  RefreshControl,
-  TouchableOpacity,
-  Image,
-} from 'react-native';
+import {View, StyleSheet, FlatList, RefreshControl, Alert} from 'react-native';
 import {getSublistMenu} from '../../api';
 import {COMPANY_ID} from '../../constant';
 import Product from './Product';
-import ModalProduct from './ModalProduct';
-import useFavorite from '../../hooks/useFavorite';
 import {useNavigation} from '@react-navigation/native';
-import Love from '../../assets/images/favourite.png';
 
 const HomeScreen = (props: any) => {
   const {route} = props;
@@ -21,12 +11,10 @@ const HomeScreen = (props: any) => {
     [],
   );
   const {navigate} = useNavigation();
-  const {onSaveFavorite, onRemoveFavorite} = useFavorite();
-  const [openModal, setOpenModal] = React.useState<boolean>(false);
+
   const [loading, setLoading] = React.useState<boolean>(false);
-  const [selectProduct, setSelectProduct] =
-    React.useState<Home.ResponseSubMenu | null>(null);
-  const getSubListCategory = async () => {
+
+  const getSubListCategory = async (isShowAlert?: boolean) => {
     try {
       setLoading(true);
       const response = await getSublistMenu(COMPANY_ID, route.params.id);
@@ -34,6 +22,9 @@ const HomeScreen = (props: any) => {
       setListSubMenu(data.data);
       setLoading(false);
     } catch (e) {
+      if (isShowAlert) {
+        Alert.alert('Error', 'Something wrong please try again');
+      }
       setLoading(false);
     }
   };
@@ -43,33 +34,18 @@ const HomeScreen = (props: any) => {
   };
 
   const onClickProduct = (product: Home.ResponseSubMenu) => {
-    setOpenModal(true);
-    setSelectProduct(product);
-  };
-
-  const closeModal = () => {
-    setOpenModal(false);
+    navigate('ProductDetail' as never, {product});
   };
 
   React.useEffect(() => {
     if (route.params?.id) {
-      getSubListCategory();
+      getSubListCategory(true);
     }
   }, [route.params]);
-
-  const onSaveFavoriteHandle = () => {
-    if (selectProduct) {
-      onSaveFavorite(selectProduct);
-    }
-  };
 
   const renderItem = ({item}: any) => (
     <Product item={item} numColumn={3} onPress={onClickProduct} />
   );
-
-  const goToFavoritePage = () => {
-    navigate('Favorite');
-  };
 
   return (
     <View style={styles.containerMenu}>
@@ -80,21 +56,8 @@ const HomeScreen = (props: any) => {
         data={listSubMenu}
         renderItem={renderItem}
         numColumns={3}
+        keyExtractor={item => item.id}
       />
-      <ModalProduct
-        onBackButtonPress={closeModal}
-        onBackdropPress={closeModal}
-        isVisible={openModal}
-        useNativeDriver={true}
-        selectProduct={selectProduct}
-        onSaveFavoriteHandle={onSaveFavoriteHandle}
-        onRemoveFavorite={onRemoveFavorite}
-      />
-      <View>
-        <TouchableOpacity style={styles.floatButton} onPress={goToFavoritePage}>
-          <Image source={Love} />
-        </TouchableOpacity>
-      </View>
     </View>
   );
 };
